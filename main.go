@@ -106,8 +106,13 @@ func main() {
 		log.Fatalf("Error committing trigger commit for repository %v: %v", *repoName, err)
 	}
 
-	err = gitPush(*repoBranch, *repoName)
+	err = gitPush(*repoBranch, subdir)
 	if err != nil {
 		log.Fatalf("Error pushing repository %v branch %v to origin: %v", *repoName, *repoBranch, err)
+	}
+
+	err = removeRepository(subdir)
+	if err != nil {
+		log.Fatalf("Failed deleting subdirectory %v: %v", subdir, err)
 	}
 }

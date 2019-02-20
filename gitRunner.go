@@ -60,6 +60,7 @@ func gitClone(gitName, gitURL, gitBranch string, shallowClone bool, shallowClone
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -83,6 +84,7 @@ func gitCommitEmpty(repoSource, repoOwner, repoName, repoBranch, buildVersion, s
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -101,6 +103,7 @@ func gitPush(gitBranch, subdir string) (err error) {
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -126,6 +129,24 @@ func setUser(username, email, subdir string) (err error) {
 	gitConfigCommand.Stderr = os.Stderr
 	gitConfigCommand.Dir = workdir
 	err = gitConfigCommand.Run()
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func removeRepository(subdir string) (err error) {
+
+	log.Printf("Removing directory %v...", subdir)
+
+	workdir := getTargetDir(subdir)
+
+	args := []string{"-rf", workdir}
+	removeDirCommand := exec.Command("rm", args...)
+	removeDirCommand.Stdout = os.Stdout
+	removeDirCommand.Stderr = os.Stderr
+	err = removeDirCommand.Run()
 	if err != nil {
 		return
 	}
