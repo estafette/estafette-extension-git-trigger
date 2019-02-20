@@ -90,7 +90,7 @@ func main() {
 	}
 
 	// git clone the specified repository branch to the specific directory
-	err := gitCloneOverride(*repoName, overrideGitURL, *repoBranch, *repoName, true, 50)
+	err := gitCloneOverride(*repoName, overrideGitURL, *repoBranch, *repoName, true, 1)
 	if err != nil {
 		log.Fatalf("Error cloning git repository %v to branch %v into subdir %v: %v", *repoName, *repoBranch, *repoName, err)
 	}
