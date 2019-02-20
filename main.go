@@ -27,7 +27,10 @@ var (
 	buildVersion = kingpin.Flag("build-version", "The version currently building/releasing.").Envar("ESTAFETTE_BUILD_VERSION").Required().String()
 
 	repoName   = kingpin.Flag("repo", "Set other repository name to clone from same owner.").Envar("ESTAFETTE_EXTENSION_REPO").Required().String()
-	repoBranch = kingpin.Flag("branch", "Set other repository branch to clone from same owner.").Envar("ESTAFETTE_EXTENSION_BRANCH").String()
+	repoBranch = kingpin.Flag("branch", "Set other repository branch to clone from same owner.").Default("master").OverrideDefaultFromEnvar("ESTAFETTE_EXTENSION_BRANCH").String()
+
+	username = kingpin.Flag("username", "The username for the empty commit author").Default("Estafette Git Bot").OverrideDefaultFromEnvar("ESTAFETTE_EXTENSION_USERNAME").String()
+	email    = kingpin.Flag("email", "The email address for the empty commit author.").Default("git-bot@estafette.io").OverrideDefaultFromEnvar("ESTAFETTE_EXTENSION_EMAIL").String()
 
 	bitbucketAPITokenJSON = kingpin.Flag("bitbucket-api-token", "Bitbucket api token credentials configured at the CI server, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_BITBUCKET_API_TOKEN").String()
 	githubAPITokenJSON    = kingpin.Flag("github-api-token", "Github api token credentials configured at the CI server, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_GITHUB_API_TOKEN").String()
@@ -77,9 +80,7 @@ func main() {
 		githubAPIToken = credentials[0].AdditionalProperties.Token
 	}
 
-	if *repoBranch == "" {
-		*repoBranch = "master"
-	}
+	subdir := *repoName
 
 	overrideGitURL := fmt.Sprintf("https://%v/%v/%v", *gitSource, *gitOwner, *repoName)
 	if bitbucketAPIToken != "" {
@@ -90,9 +91,14 @@ func main() {
 	}
 
 	// git clone the specified repository branch to the specific directory
-	err := gitCloneOverride(*repoName, overrideGitURL, *repoBranch, *repoName, true, 1)
+	err := gitCloneOverride(*repoName, overrideGitURL, *repoBranch, subdir, true, 1)
 	if err != nil {
-		log.Fatalf("Error cloning git repository %v to branch %v into subdir %v: %v", *repoName, *repoBranch, *repoName, err)
+		log.Fatalf("Error cloning git repository %v to branch %v into subdir %v: %v", *repoName, *repoBranch, subdir, err)
+	}
+
+	err = setUser(*username, *email, subdir)
+	if err != nil {
+		log.Fatalf("Error setting commit author to %v <%v>: %v", *username, *email, err)
 	}
 
 	err = gitCommitEmpty(*gitSource, *gitOwner, *gitName, *gitBranch, *buildVersion, *repoName)

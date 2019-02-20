@@ -69,6 +69,8 @@ func getTargetDir(subdir string) string {
 
 func gitCommitEmpty(repoSource, repoOwner, repoName, repoBranch, buildVersion, subdir string) (err error) {
 
+	log.Printf("Creating empty commit for repository %v/%v/%v...", repoSource, repoOwner, repoName)
+
 	message := fmt.Sprintf("Triggered by %v/%v/%v, branch %v, version %v", repoSource, repoOwner, repoName, repoBranch, buildVersion)
 	workdir := getTargetDir(subdir)
 
@@ -86,6 +88,8 @@ func gitCommitEmpty(repoSource, repoOwner, repoName, repoBranch, buildVersion, s
 
 func gitPush(gitBranch, subdir string) (err error) {
 
+	log.Printf("Pushing empty commit for subdir %v to origin...", subdir)
+
 	workdir := getTargetDir(subdir)
 
 	args := []string{"push", "origin", gitBranch}
@@ -97,5 +101,34 @@ func gitPush(gitBranch, subdir string) (err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+func setUser(username, email, subdir string) (err error) {
+
+	log.Printf("Setting user name %v and email %v for repository in subdir %v...", username, email, subdir)
+
+	workdir := getTargetDir(subdir)
+
+	args := []string{"config", "user.email", email}
+	gitConfigCommand := exec.Command("git", args...)
+	gitConfigCommand.Stdout = os.Stdout
+	gitConfigCommand.Stderr = os.Stderr
+	gitConfigCommand.Dir = workdir
+	err = gitConfigCommand.Run()
+	if err != nil {
+		return
+	}
+
+	args = []string{"config", "user.name", username}
+	gitConfigCommand = exec.Command("git", args...)
+	gitConfigCommand.Stdout = os.Stdout
+	gitConfigCommand.Stderr = os.Stderr
+	gitConfigCommand.Dir = workdir
+	err = gitConfigCommand.Run()
+	if err != nil {
+		return
+	}
+
 	return
 }
