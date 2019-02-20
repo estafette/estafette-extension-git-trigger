@@ -48,9 +48,6 @@ func main() {
 	// log startup message
 	log.Printf("Starting estafette-extension-git-trigger version %v...", version)
 
-	// log all environment variables
-	log.Printf("%v", os.Environ())
-
 	// get api token from injected credentials
 	bitbucketAPIToken := ""
 	if *bitbucketAPITokenJSON != "" {
