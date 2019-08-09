@@ -49,8 +49,6 @@ stages:
     container: git-trigger
     repositories:
     - extensions
-    tags:
-    - dev
 
   slack-notify:
     image: extensions/slack-build-status:dev
@@ -62,6 +60,21 @@ stages:
       status == 'failed'
 
 releases:
+  dev:
+    triggers:
+    - pipeline:
+        name: self
+        branch: .+
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: git-trigger
+        repositories:
+        - extensions
+        tags:
+        - dev
+
   beta:
     stages:
       tag-container-image:
